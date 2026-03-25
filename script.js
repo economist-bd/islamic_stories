@@ -428,18 +428,52 @@ const stories = [
 // গল্পগুলো স্ক্রিনে দেখানোর ফাংশন
 const storyContainer = document.getElementById('storyContainer');
 
-stories.forEach(story => {
-    const card = document.createElement('div');
-    card.className = 'story-card';
-    card.innerHTML = `
-        <div class="story-icon">${story.icon}</div>
-        <div class="story-title">${story.title}</div>
-    `;
-    card.onclick = () => openModal(story);
-    storyContainer.appendChild(card);
-});
+// লোকাল স্টোরেজ থেকে পড়া গল্পের আইডিগুলো টেনে আনা
+function getReadStories() {
+    const saved = localStorage.getItem('mh_academy_read_stories');
+    return saved ? JSON.parse(saved) : [];
+}
 
-// Modal Control Functions
+// কোনো গল্প পড়লে তার আইডি স্টোরেজে সেভ করা
+function markAsRead(id) {
+    const readStories = getReadStories();
+    if (!readStories.includes(id)) {
+        readStories.push(id);
+        localStorage.setItem('mh_academy_read_stories', JSON.stringify(readStories));
+        renderStories(); // আপডেট দেখানোর জন্য রি-রেন্ডার করা
+    }
+}
+
+// স্ক্রিনে গল্পগুলো রেন্ডার করার ফাংশন
+function renderStories() {
+    storyContainer.innerHTML = ''; // আগেরগুলো ক্লিয়ার করা
+    const readStories = getReadStories();
+
+    stories.forEach(story => {
+        const isRead = readStories.includes(story.id); // চেক করা গল্পটি পড়া হয়েছে কিনা
+        const card = document.createElement('div');
+        
+        // পড়া হয়ে থাকলে 'read' ক্লাস যুক্ত হবে
+        card.className = `story-card ${isRead ? 'read' : ''}`; 
+        
+        card.innerHTML = `
+            <div class="story-icon">${story.icon}</div>
+            <div class="story-title">${story.title}</div>
+            ${isRead ? '<div class="read-badge">✔️ পড়া হয়েছে</div>' : ''}
+        `;
+        
+        card.onclick = () => {
+            openModal(story);
+            markAsRead(story.id); // ক্লিক করলেই স্টোরেজে সেভ হয়ে যাবে
+        };
+        storyContainer.appendChild(card);
+    });
+}
+
+// প্রথমবার পেজ লোড হলে গল্পগুলো দেখাবে
+renderStories();
+
+// Modal Control Functions (আগের মতোই থাকবে)
 function openModal(story) {
     document.getElementById('modalTitle').innerText = story.title;
     document.getElementById('modalBody').innerText = story.content;
@@ -451,14 +485,14 @@ function closeModal() {
     document.getElementById('storyModal').style.display = 'none';
 }
 
-// PWA Install Button Logic
+// PWA Install Button Logic (আগের মতোই থাকবে)
 let deferredPrompt;
 const installAppBtn = document.getElementById('installAppBtn');
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    installAppBtn.style.display = 'block'; // বাটনটি দেখান
+    installAppBtn.style.display = 'block'; 
 });
 
 installAppBtn.addEventListener('click', async () => {
@@ -472,7 +506,6 @@ installAppBtn.addEventListener('click', async () => {
     }
 });
 
-// Service Worker Registration for PWA
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
     .then(() => console.log('Service Worker Registered Successfully'));
