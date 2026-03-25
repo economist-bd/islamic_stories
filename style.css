@@ -154,3 +154,25 @@ body {
     font-size: 1.1rem;
     color: #000;
 }
+/* Read Status Styles */
+.story-card.read {
+    background-color: #F5F5F5;
+    border-top: 5px solid #9E9E9E;
+    box-shadow: none;
+}
+
+.story-card.read .story-title {
+    color: #757575;
+}
+
+.read-badge {
+    color: #4CAF50;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
